@@ -1,0 +1,1345 @@
+{
+  "9": {
+    "inputs": {
+      "options": "Intermediate and Utility",
+      "filenames": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "VHS_PruneOutputs",
+    "_meta": {
+      "title": "Prune Outputs 🎥🅥🅗🅢"
+    }
+  },
+  "18": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "merged_CB_L_V2.safetensors",
+        "strength": 0.5
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "NSFW-22-L-e8.safetensors",
+        "strength": 0.3
+      },
+      "lora_3": {
+        "on": false,
+        "lora": "livewallpaper_wan22_14b_i2v_low_model_0_1_e26.safetensors",
+        "strength": 1
+      },
+      "lora_4": {
+        "on": false,
+        "lora": "wan2.2_t2v_lownoise_cowgirl_v1.0.safetensors",
+        "strength": 0.8
+      },
+      "lora_5": {
+        "on": false,
+        "lora": "DR34ML4Y_I2V_14B_LOW_V2.safetensors",
+        "strength": 0.7
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "1512:1534",
+        0
+      ],
+      "clip": [
+        "1512:1504",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Lora's LOW"
+    }
+  },
+  "23": {
+    "inputs": {
+      "image": "x_00398_.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "First-Frame-Image"
+    }
+  },
+  "24": {
+    "inputs": {
+      "image": "x_00398_.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Last-Frame-Image"
+    }
+  },
+  "26": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "merged_CB_H_V2.safetensors",
+        "strength": 0.5
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "NSFW-22-H-e8.safetensors",
+        "strength": 0.3
+      },
+      "lora_3": {
+        "on": false,
+        "lora": "livewallpaper_wan22_14b_i2v_low_model_0_1_e26.safetensors",
+        "strength": 2
+      },
+      "lora_4": {
+        "on": false,
+        "lora": "wan2.2_t2v_highnoise_cowgirl_v1.0.safetensors",
+        "strength": 0.8
+      },
+      "lora_5": {
+        "on": false,
+        "lora": "DR34ML4Y_I2V_14B_HIGH_V2.safetensors",
+        "strength": 0.7
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "1512:1539",
+        0
+      ],
+      "clip": [
+        "1512:1504",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Lora's HIGH"
+    }
+  },
+  "28": {
+    "inputs": {
+      "frame_rate": [
+        "1512:1814:1813",
+        0
+      ],
+      "loop_count": 0,
+      "filename_prefix": "video/2026-09-13/001608",
+      "format": "video/webm",
+      "pix_fmt": "yuv420p",
+      "crf": 20,
+      "save_metadata": false,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "1512:1814:1812",
+        0
+      ],
+      "audio": [
+        "1512:1757",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine 🎥🅥🅗🅢"
+    }
+  },
+  "1349": {
+    "inputs": {
+      "text": "censored, mosaic censoring, bar censor, pixelated, glowing, bloom, blurry, out of focus, low detail, bad anatomy, ugly, overexposed, underexposed, distorted face, extra limbs, cartoonish, 3d render artifacts, duplicate people, unnatural lighting, bad composition, missing shadows, low resolution, poorly textured, glitch, noise, grain, static, motionless, still frame, stylized, artwork, painting, illustration, many people in background, three legs, walking backward, unnatural skin tone, discolored eyelid, red eyelids, closed eyes, poorly drawn hands, extra fingers, fused fingers, poorly drawn face, deformed, disfigured, malformed limbs, fog, mist, voluminous eyelashes, blink, blinking eyes",
+      "clip": [
+        "26",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Video prompt negative"
+    }
+  },
+  "1370": {
+    "inputs": {
+      "text": "2D animation effects，4K resolution, high-quality resolution， nsfwsks, A girl lying on side, her legs are spread. She and a man are having anal sex. Mans penis moves back and forth in her anus，The penis thrusts back and forth in the anus. Her breasts moves with motion.\n",
+      "clip": [
+        "26",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Video prompt positive"
+    }
+  },
+  "1371": {
+    "inputs": {
+      "value": ""
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Audio prompt positive"
+    }
+  },
+  "1372": {
+    "inputs": {
+      "value": "noisy, harsh, crash, bang, music, background melody, synthesizer, male vocals, talking, speech, low quality, distorted, ambient noise, room tone, pounding, wet, pounding,"
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Audio prompt negative"
+    }
+  },
+  "1512:1576": {
+    "inputs": {
+      "samples": [
+        "1512:1580",
+        0
+      ],
+      "vae": [
+        "1512:1503",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1512:1590": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "width": [
+        "1512:1588:317",
+        0
+      ],
+      "height": [
+        "1512:1588:317",
+        1
+      ],
+      "crop": "disabled",
+      "image": [
+        "24",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "1512:1584": {
+    "inputs": {
+      "images": [
+        "1512:1576",
+        0
+      ]
+    },
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "FLF2V context"
+    }
+  },
+  "1512:1573": {
+    "inputs": {
+      "model": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "CFGZeroStar",
+    "_meta": {
+      "title": "CFGZeroStar"
+    }
+  },
+  "1512:1574": {
+    "inputs": {
+      "model": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "CFGZeroStar",
+    "_meta": {
+      "title": "CFGZeroStar"
+    }
+  },
+  "1512:1593": {
+    "inputs": {
+      "width": [
+        "1512:1588:317",
+        0
+      ],
+      "height": [
+        "1512:1588:317",
+        1
+      ],
+      "length": [
+        "1512:1594",
+        0
+      ],
+      "batch_size": 1,
+      "positive": [
+        "1370",
+        0
+      ],
+      "negative": [
+        "1349",
+        0
+      ],
+      "vae": [
+        "1512:1503",
+        0
+      ],
+      "start_image": [
+        "1512:1588:329",
+        0
+      ],
+      "end_image": [
+        "1512:1590",
+        0
+      ]
+    },
+    "class_type": "WanFirstLastFrameToVideo",
+    "_meta": {
+      "title": "WanFirstLastFrameToVideo"
+    }
+  },
+  "1512:1579": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "1512:1670",
+        0
+      ],
+      "steps": [
+        "1512:1671",
+        0
+      ],
+      "cfg": [
+        "1512:1671",
+        2
+      ],
+      "sampler_name": [
+        "1512:1671",
+        3
+      ],
+      "scheduler": [
+        "1512:1671",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": [
+        "1512:1671",
+        1
+      ],
+      "return_with_leftover_noise": "enable",
+      "model": [
+        "1512:1573",
+        0
+      ],
+      "positive": [
+        "1512:1593",
+        0
+      ],
+      "negative": [
+        "1512:1593",
+        1
+      ],
+      "latent_image": [
+        "1512:1593",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "1512:1580": {
+    "inputs": {
+      "add_noise": "disable",
+      "noise_seed": [
+        "1512:1670",
+        0
+      ],
+      "steps": [
+        "1512:1671",
+        0
+      ],
+      "cfg": [
+        "1512:1671",
+        2
+      ],
+      "sampler_name": [
+        "1512:1671",
+        3
+      ],
+      "scheduler": [
+        "1512:1671",
+        4
+      ],
+      "start_at_step": [
+        "1512:1671",
+        1
+      ],
+      "end_at_step": 10000,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "1512:1574",
+        0
+      ],
+      "positive": [
+        "1512:1593",
+        0
+      ],
+      "negative": [
+        "1512:1593",
+        1
+      ],
+      "latent_image": [
+        "1512:1579",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "1512:1516": {
+    "inputs": {
+      "ctx_01": [
+        "1512:1513",
+        0
+      ],
+      "ctx_02": [
+        "1512:1514",
+        0
+      ]
+    },
+    "class_type": "Context Switch (rgthree)",
+    "_meta": {
+      "title": "Context Switch (rgthree)"
+    }
+  },
+  "1512:1668": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Seconds"
+    }
+  },
+  "1512:1712": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "s2v context"
+    }
+  },
+  "1512:1702": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1530": {
+    "inputs": {
+      "sage_attention": "auto",
+      "allow_compile": false,
+      "model": [
+        "1512:1516",
+        1
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "1512:1523": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1502": {
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BLightspeed_synthseductionHighV9.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "1512:1517": {
+    "inputs": {
+      "model": [
+        "1512:1502",
+        0
+      ]
+    },
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "Context (safetensor high)"
+    }
+  },
+  "1512:1664": {
+    "inputs": {
+      "any_01": [
+        "1512:1528",
+        0
+      ],
+      "any_02": [
+        "1512:1540",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1528": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1525": {
+    "inputs": {
+      "any_01": [
+        "1512:1523",
+        0
+      ],
+      "any_02": [
+        "1512:1540",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1538": {
+    "inputs": {
+      "sage_attention": "auto",
+      "allow_compile": false,
+      "model": [
+        "1512:1515",
+        1
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "1512:1537": {
+    "inputs": {
+      "boolean": [
+        "1512:1525",
+        0
+      ],
+      "on_true": [
+        "1512:1538",
+        0
+      ],
+      "on_false": [
+        "1512:1515",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else HIGH"
+    }
+  },
+  "1512:1531": {
+    "inputs": {
+      "boolean": [
+        "1512:1525",
+        0
+      ],
+      "on_true": [
+        "1512:1530",
+        0
+      ],
+      "on_false": [
+        "1512:1516",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else LOW"
+    }
+  },
+  "1512:1522": {
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:1531",
+        0
+      ]
+    },
+    "class_type": "ModelPatchTorchSettings",
+    "_meta": {
+      "title": "Model Patch Torch Settings"
+    }
+  },
+  "1512:1536": {
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:1537",
+        0
+      ]
+    },
+    "class_type": "ModelPatchTorchSettings",
+    "_meta": {
+      "title": "Model Patch Torch Settings"
+    }
+  },
+  "1512:1535": {
+    "inputs": {
+      "boolean": [
+        "1512:1664",
+        0
+      ],
+      "on_true": [
+        "1512:1536",
+        0
+      ],
+      "on_false": [
+        "1512:1537",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else HIGH"
+    }
+  },
+  "1512:1529": {
+    "inputs": {
+      "boolean": [
+        "1512:1664",
+        0
+      ],
+      "on_true": [
+        "1512:1522",
+        0
+      ],
+      "on_false": [
+        "1512:1531",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else LOW"
+    }
+  },
+  "1512:1539": {
+    "inputs": {
+      "shift": 5,
+      "model": [
+        "1512:1535",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "Sigma Shift High"
+    }
+  },
+  "1512:1534": {
+    "inputs": {
+      "shift": 5,
+      "model": [
+        "1512:1529",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "Sigma Shift Low"
+    }
+  },
+  "1512:1671": {
+    "inputs": {
+      "steps_total": 5,
+      "refiner_step": 2,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "linear_quadratic"
+    },
+    "class_type": "KSampler Config (rgthree)",
+    "_meta": {
+      "title": "Sampling"
+    }
+  },
+  "1512:1594": {
+    "inputs": {
+      "expression": "(round((a * b) / 8) * 8) +1",
+      "a": [
+        "1512:1668",
+        0
+      ],
+      "b": [
+        "1512:1669",
+        0
+      ]
+    },
+    "class_type": "MathExpression|pysssss",
+    "_meta": {
+      "title": "frames logic 🐍"
+    }
+  },
+  "1512:1670": {
+    "inputs": {
+      "value": 347370718054507
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Seed"
+    }
+  },
+  "1512:1512": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "Context (gguf high)"
+    }
+  },
+  "1512:1515": {
+    "inputs": {
+      "ctx_01": [
+        "1512:1517",
+        0
+      ],
+      "ctx_02": [
+        "1512:1512",
+        0
+      ]
+    },
+    "class_type": "Context Switch (rgthree)",
+    "_meta": {
+      "title": "Context Switch (rgthree)"
+    }
+  },
+  "1512:1513": {
+    "inputs": {
+      "model": [
+        "1512:1501",
+        0
+      ]
+    },
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "Context (safetensor low)"
+    }
+  },
+  "1512:1514": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "Context (gguf low)"
+    }
+  },
+  "1512:1585": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "I2V context"
+    }
+  },
+  "1512:1589": {
+    "inputs": {
+      "ctx_01": [
+        "1512:1585",
+        0
+      ],
+      "ctx_02": [
+        "1512:1584",
+        0
+      ],
+      "ctx_03": [
+        "1512:1637",
+        0
+      ],
+      "ctx_04": [
+        "1512:1712",
+        0
+      ]
+    },
+    "class_type": "Context Switch (rgthree)",
+    "_meta": {
+      "title": "Context Switch (rgthree)"
+    }
+  },
+  "1512:1730:1280": {
+    "inputs": {
+      "boolean": [
+        "1512:1730:1282",
+        0
+      ],
+      "on_true": [
+        "1512:1730:1279",
+        0
+      ],
+      "on_false": [
+        "1512:1589",
+        7
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "1512:1730:1282": {
+    "inputs": {
+      "any_01": [
+        "1512:1730:1278",
+        0
+      ],
+      "any_02": [
+        "1512:1730:1281",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1730:1278": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1730:1279": {
+    "inputs": {
+      "method": "hm-mvgd-hm",
+      "strength": 0.75,
+      "multithread": true,
+      "image_ref": [
+        "1512:1784",
+        7
+      ],
+      "image_target": [
+        "1512:1589",
+        7
+      ]
+    },
+    "class_type": "ColorMatch",
+    "_meta": {
+      "title": "Color Match"
+    }
+  },
+  "1512:1730:1281": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1730:1283": {
+    "inputs": {
+      "preview": "",
+      "previewMode": null,
+      "source": [
+        "1512:1730:1282",
+        0
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview as Text"
+    }
+  },
+  "1512:1783": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "reference combine context"
+    }
+  },
+  "1512:1782": {
+    "inputs": {
+      "images": [
+        "1512:1588:329",
+        0
+      ]
+    },
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "reference I2V context"
+    }
+  },
+  "1512:1784": {
+    "inputs": {
+      "ctx_01": [
+        "1512:1783",
+        0
+      ],
+      "ctx_02": [
+        "1512:1782",
+        0
+      ]
+    },
+    "class_type": "Context Switch (rgthree)",
+    "_meta": {
+      "title": "Context Switch (rgthree)"
+    }
+  },
+  "1512:1637": {
+    "inputs": {},
+    "class_type": "Context (rgthree)",
+    "_meta": {
+      "title": "combine context"
+    }
+  },
+  "1512:1669": {
+    "inputs": {
+      "value": 16
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "FPS"
+    }
+  },
+  "1512:1814:1810": {
+    "inputs": {
+      "any_02": [
+        "1512:1669",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (FPS)"
+    }
+  },
+  "1512:1814:1812": {
+    "inputs": {
+      "ckpt_name": "rife49.pth",
+      "clear_cache_after_n_frames": 10,
+      "multiplier": 2,
+      "fast_mode": true,
+      "ensemble": true,
+      "scale_factor": 1,
+      "dtype": "float32",
+      "torch_compile": false,
+      "batch_size": 1,
+      "frames": [
+        "1512:1729:1105",
+        0
+      ]
+    },
+    "class_type": "RIFE VFI",
+    "_meta": {
+      "title": "RIFE VFI (recommend rife47 and rife49)"
+    }
+  },
+  "1512:1814:1813": {
+    "inputs": {
+      "a": [
+        "1512:1814:1810",
+        0
+      ],
+      "b": 2,
+      "operation": "multiply"
+    },
+    "class_type": "easy mathFloat",
+    "_meta": {
+      "title": "Math FPS"
+    }
+  },
+  "1512:1731:933": {
+    "inputs": {
+      "ckpt_name": "rife49.pth",
+      "scale_factor": 1,
+      "ensemble": true,
+      "multiplier": 4,
+      "use_first_two": true,
+      "use_last_two": true,
+      "use_global_median": true,
+      "calibrate_metric": "MSE",
+      "calibrate_iters": 12,
+      "t_min": 0,
+      "t_max": 0.96,
+      "auto_tmax": true,
+      "t_cap": 0.995,
+      "full_clip": [
+        "1512:1731:932",
+        1
+      ]
+    },
+    "class_type": "RIFE_SeamTimingAnalyzer",
+    "_meta": {
+      "title": "🐇 RIFE Seam Timing Analyzer"
+    }
+  },
+  "1512:1731:1100": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1731:934": {
+    "inputs": {
+      "max_end_crop_frames": 8,
+      "include_first_step": true,
+      "include_last_step": true,
+      "include_global_median_step": true,
+      "seam_window_frames": 6,
+      "distance_metric": "MSE",
+      "score_in_8bit": false,
+      "use_ssim_similarity": true,
+      "use_exposure_guard": true,
+      "use_flow_guard": true,
+      "weight_step_size": 0.55,
+      "weight_similarity": 0.3,
+      "weight_exposure": 0.1,
+      "weight_flow": 0.05,
+      "ssim_downsample_scales": "1,2",
+      "accelerate_with_gpu": true,
+      "use_mixed_precision": true,
+      "clip_frames": [
+        "1512:1730:1280",
+        0
+      ]
+    },
+    "class_type": "AutocropToLoop",
+    "_meta": {
+      "title": "🐇 Autocrop to Loop"
+    }
+  },
+  "1512:1731:1236": {
+    "inputs": {
+      "preview": "",
+      "previewMode": null,
+      "source": [
+        "1512:1731:1098",
+        0
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview as Text"
+    }
+  },
+  "1512:1731:1098": {
+    "inputs": {
+      "any_01": [
+        "1512:1731:1100",
+        0
+      ],
+      "any_02": [
+        "1512:1731:1101",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1731:1101": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1731:1099": {
+    "inputs": {
+      "boolean": [
+        "1512:1731:1098",
+        0
+      ],
+      "on_true": [
+        "1512:1731:965",
+        0
+      ],
+      "on_false": [
+        "1512:1730:1280",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "1512:1731:932": {
+    "inputs": {
+      "images": [
+        "1512:1731:934",
+        0
+      ]
+    },
+    "class_type": "PrepareLoopFrames",
+    "_meta": {
+      "title": "🐇 Prepare Loop Frames"
+    }
+  },
+  "1512:1731:931": {
+    "inputs": {
+      "ckpt_name": "rife49.pth",
+      "multiplier": [
+        "1512:1731:933",
+        1
+      ],
+      "t_mode": "linear",
+      "t_gamma": 1,
+      "t_min": 0,
+      "t_max": 1,
+      "scale_factor": 1,
+      "ensemble": true,
+      "clear_cache_after_n_frames": 200,
+      "custom_t_list_csv": [
+        "1512:1731:933",
+        0
+      ],
+      "frames": [
+        "1512:1731:932",
+        0
+      ]
+    },
+    "class_type": "RIFE_VFI_Advanced",
+    "_meta": {
+      "title": "🐇 RIFE VFI Custom Timing"
+    }
+  },
+  "1512:1731:965": {
+    "inputs": {
+      "original_images": [
+        "1512:1731:932",
+        1
+      ],
+      "interpolated_frames": [
+        "1512:1731:931",
+        0
+      ]
+    },
+    "class_type": "AssembleLoopFrames",
+    "_meta": {
+      "title": "🐇 Assemble Loop Frames"
+    }
+  },
+  "1512:1540": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "1512:1757": {
+    "inputs": {},
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1503": {
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "1512:1588:322": {
+    "inputs": {
+      "value": 0.72
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "1512:1588:329": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "width": [
+        "1512:1588:316",
+        0
+      ],
+      "height": [
+        "1512:1588:318",
+        0
+      ],
+      "crop": "disabled",
+      "image": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "1512:1588:317": {
+    "inputs": {
+      "image": [
+        "1512:1588:329",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "1512:1588:316": {
+    "inputs": {
+      "expression": "round(sqrt(a * 1000000 * (b / c)) / 16) * 16",
+      "a": [
+        "1512:1588:327",
+        0
+      ],
+      "b": [
+        "1512:1588:328",
+        0
+      ],
+      "c": [
+        "1512:1588:328",
+        1
+      ]
+    },
+    "class_type": "MathExpression|pysssss",
+    "_meta": {
+      "title": "Width 🐍"
+    }
+  },
+  "1512:1588:327": {
+    "inputs": {
+      "any_05": [
+        "1512:1588:322",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "1512:1588:318": {
+    "inputs": {
+      "expression": "round((a / (b / c)) / 16) * 16",
+      "a": [
+        "1512:1588:316",
+        0
+      ],
+      "b": [
+        "1512:1588:328",
+        0
+      ],
+      "c": [
+        "1512:1588:328",
+        1
+      ]
+    },
+    "class_type": "MathExpression|pysssss",
+    "_meta": {
+      "title": "Height 🐍"
+    }
+  },
+  "1512:1588:328": {
+    "inputs": {
+      "image": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "1512:1729:1106": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "1512:1729:1105": {
+    "inputs": {
+      "max_batch_size": 0,
+      "tile_size": 0,
+      "channels_last": false,
+      "precision": "fp32",
+      "upscale_model": [
+        "1512:1729:1106",
+        0
+      ],
+      "image": [
+        "1512:1731:1099",
+        0
+      ]
+    },
+    "class_type": "UpscaleWithModelAdvanced",
+    "_meta": {
+      "title": "🐇 Upscale w/ Model (Advanced)"
+    }
+  },
+  "1512:1504": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "1512:1501": {
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BLightspeed_synthseductionLowV9.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  }
+}

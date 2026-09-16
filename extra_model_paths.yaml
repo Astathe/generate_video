@@ -18,5 +18,6 @@ comfyui:
     loras: |
         models/loras/
         /runpod-volume/loras/
+    foley: models/foley/
     upscale_models: models/upscale_models/
     vae: models/vae/
