@@ -30,28 +30,15 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
     mv ComfyUI-AdaptiveWindowSize/ComfyUI-AdaptiveWindowSize/* ComfyUI-AdaptiveWindowSize/
 
 RUN mkdir -p \
-        /ComfyUI/models/diffusion_models \
-        /ComfyUI/models/loras \
-        /ComfyUI/models/foley \
-        /ComfyUI/models/clip_vision \
-        /ComfyUI/models/text_encoders \
-        /ComfyUI/models/vae && \
-    wget -nv "https://huggingface.co/buckets/Astathe/DaSiWa-WAN2.2-S2V-bucket/resolve/Distilled/FP8/v02/DasiwaWan2214BS2V_littledemonV2.safetensors" -O /ComfyUI/models/diffusion_models/DasiwaWan2214BS2V_littledemonV2.safetensors && \
-    wget -nv "https://huggingface.co/johnjohn200/wanautoinstall/resolve/49ef17f027512fbbfea5508e00ed15082a683b6e/DasiwaWAN22I2V14BLightspeed_synthseductionHighV9.safetensors" -O /ComfyUI/models/diffusion_models/DasiwaWAN22I2V14BLightspeed_synthseductionHighV9.safetensors && \
-    wget -nv "https://huggingface.co/johnjohn200/wanautoinstall/resolve/49ef17f027512fbbfea5508e00ed15082a683b6e/DasiwaWAN22I2V14BLightspeed_synthseductionLowV9.safetensors" -O /ComfyUI/models/diffusion_models/DasiwaWAN22I2V14BLightspeed_synthseductionLowV9.safetensors && \
-    wget -nv "https://huggingface.co/75dhsx2/mizukir0418575/resolve/main/merged_CB_H_V2.safetensors" -O /ComfyUI/models/loras/merged_CB_H_V2.safetensors && \
-    wget -nv "https://huggingface.co/75dhsx2/mizukir0418575/resolve/main/merged_CB_L_V2.safetensors" -O /ComfyUI/models/loras/merged_CB_L_V2.safetensors && \
-    wget -nv "https://huggingface.co/Serenak/chilloutmix/resolve/main/DR34ML4Y_I2V_14B_HIGH_V2.safetensors" -O /ComfyUI/models/loras/DR34ML4Y_I2V_14B_HIGH_V2.safetensors && \
-    wget -nv "https://huggingface.co/Serenak/chilloutmix/resolve/main/DR34ML4Y_I2V_14B_LOW_V2.safetensors" -O /ComfyUI/models/loras/DR34ML4Y_I2V_14B_LOW_V2.safetensors && \
-    wget -nv "https://huggingface.co/rahul7star/wan2.2Lora/resolve/main/NSFW-22-H-e8.safetensors" -O /ComfyUI/models/loras/NSFW-22-H-e8.safetensors && \
-    wget -nv "https://huggingface.co/rahul7star/wan2.2Lora/resolve/main/NSFW-22-L-e8.safetensors" -O /ComfyUI/models/loras/NSFW-22-L-e8.safetensors && \
-    wget -nv "https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/main/synchformer_state_dict_fp16.safetensors" -O /ComfyUI/models/foley/synchformer_state_dict_fp16.safetensors && \
-    wget -nv "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors" -O /ComfyUI/models/clip_vision/clip_vision_h.safetensors && \
-    wget -nv "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors" -O /ComfyUI/models/text_encoders/umt5-xxl-enc-bf16.safetensors && \
-    wget -nv "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors" -O /ComfyUI/models/vae/Wan2_1_VAE_bf16.safetensors
+    /ComfyUI/models/diffusion_models \
+    /ComfyUI/models/loras \
+    /ComfyUI/models/foley \
+    /ComfyUI/models/clip_vision \
+    /ComfyUI/models/text_encoders \
+    /ComfyUI/models/vae
 
 COPY . .
 COPY extra_model_paths.yaml /ComfyUI/extra_model_paths.yaml
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh /download_models.sh
 
 CMD ["/entrypoint.sh"]

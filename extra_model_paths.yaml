@@ -7,7 +7,9 @@ comfyui:
     is_default: true
     checkpoints: models/checkpoints/
     clip: models/clip/
-    clip_vision: models/clip_vision/
+    clip_vision: |
+        models/clip_vision/
+        /runpod-volume/clip_vision/
     configs: models/configs/
     controlnet: models/controlnet/
     diffusion_models: |
@@ -18,6 +20,13 @@ comfyui:
     loras: |
         models/loras/
         /runpod-volume/loras/
-    foley: models/foley/
+    foley: |
+        models/foley/
+        /runpod-volume/foley/
+    text_encoders: |
+        models/text_encoders/
+        /runpod-volume/text_encoders/
     upscale_models: models/upscale_models/
-    vae: models/vae/
+    vae: |
+        models/vae/
+        /runpod-volume/vae/

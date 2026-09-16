@@ -3,6 +3,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+echo "Ensuring models are present..."
+/download_models.sh
+
 # Start ComfyUI in the background
 echo "Starting ComfyUI in the background..."
 python /ComfyUI/main.py --listen --use-sage-attention &
