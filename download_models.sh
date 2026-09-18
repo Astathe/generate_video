@@ -11,6 +11,8 @@
 #   HF_TOKEN             sent to huggingface.co if set (private/gated repos)
 #   PARALLEL_DOWNLOADS   concurrent downloads (default: 3)
 #   DRY_RUN=1            only print what would be downloaded
+#   VOLUME_ROOT          volume mount point (default /runpod-volume; use
+#                        /workspace when running on a regular pod)
 set -uo pipefail
 
 MODEL_SETS="${MODEL_SETS:-dasiwa,wan22}"
@@ -20,15 +22,20 @@ DRY_RUN="${DRY_RUN:-0}"
 # ---------------------------------------------------------------------------
 # Target folders (must match extra_model_paths.yaml)
 # ---------------------------------------------------------------------------
-if [ -d /runpod-volume ]; then
-  ROOT=/runpod-volume
+# VOLUME_ROOT lets you fill the same network volume from a regular pod, where
+# it is mounted at /workspace instead of /runpod-volume:
+#   VOLUME_ROOT=/workspace bash download_models.sh
+VOLUME_ROOT="${VOLUME_ROOT:-/runpod-volume}"
+
+if [ -d "$VOLUME_ROOT" ]; then
+  ROOT="$VOLUME_ROOT"
   DIFFUSION="$ROOT/models"
   LORAS="$ROOT/loras"
   FOLEY="$ROOT/foley"
   CLIP_VISION="$ROOT/clip_vision"
   TEXT="$ROOT/text_encoders"
   VAE="$ROOT/vae"
-  echo "Using network volume at /runpod-volume"
+  echo "Using network volume at $ROOT"
 else
   ROOT=/ComfyUI/models
   DIFFUSION="$ROOT/diffusion_models"
@@ -37,7 +44,7 @@ else
   CLIP_VISION="$ROOT/clip_vision"
   TEXT="$ROOT/text_encoders"
   VAE="$ROOT/vae"
-  echo "WARNING: /runpod-volume is missing. Downloading onto container disk (every cold start!)."
+  echo "WARNING: $VOLUME_ROOT is missing. Downloading onto container disk (every cold start!)."
 fi
 mkdir -p "$DIFFUSION" "$LORAS" "$FOLEY" "$CLIP_VISION" "$TEXT" "$VAE"
 
