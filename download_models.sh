@@ -102,18 +102,36 @@ download() {
   fi
 
   echo "  fetching $(basename "$dest")"
-  if wget -q --tries=5 --waitretry=10 --timeout=120 "${auth[@]}" -O "$tmp" "$url"; then
+  local log="/tmp/wget-$(basename "$dest").log"
+  wget -nv --tries=5 --waitretry=10 --timeout=120 "${auth[@]}" -O "$tmp" "$url" > "$log" 2>&1
+  local rc=$?
+  if [ "$rc" -eq 0 ]; then
     if [ -s "$dest" ]; then
       rm -f "$tmp"   # another worker finished first
     else
       mv -f "$tmp" "$dest"
     fi
     echo "  done     $(basename "$dest") ($(du -h "$dest" | cut -f1))"
-  else
-    rm -f "$tmp"
-    echo "  FAILED   $url" >&2
-    return 1
+    rm -f "$log"
+    return 0
   fi
+
+  local reason
+  case "$rc" in
+    3) reason="file write error - volume/disk is probably FULL" ;;
+    4) reason="network failure" ;;
+    5) reason="SSL error" ;;
+    6) reason="authentication failed - check HF_TOKEN" ;;
+    8) reason="server returned an error (404 = wrong URL, 401/403 = private/gated, 429 = rate limited)" ;;
+    *) reason="wget exit code $rc" ;;
+  esac
+  rm -f "$tmp"
+  {
+    echo "  FAILED   $(basename "$dest"): $reason"
+    echo "           $url"
+    tail -n 3 "$log" | sed 's/^/           | /'
+  } >&2
+  return 1
 }
 
 # Remove temp files abandoned by workers that died mid-download (> 6 h old)
@@ -134,7 +152,28 @@ for s in "${SETS[@]}"; do
 done
 
 echo "Model sets: $MODEL_SETS  (${#FILES[@]} files)"
-df -h "$ROOT" | tail -1 | awk '{print "Free space on " $6 ": " $4}'
+df -h "$ROOT" | tail -1 | awk '{print "Disk " $6 ": size " $2 ", used " $3 ", free " $4}'
+
+# Estimate how much still needs downloading (HEAD request per missing file)
+if [ "$DRY_RUN" != "1" ]; then
+  need=0
+  for entry in "${FILES[@]}"; do
+    url="${entry%%|*}"; dest="${entry#*|}"
+    [ -s "$dest" ] && continue
+    hdr=()
+    if [ -n "${HF_TOKEN:-}" ] && [[ "$url" == https://huggingface.co/* ]]; then
+      hdr=(-H "Authorization: Bearer ${HF_TOKEN}")
+    fi
+    size=$(curl -sIL "${hdr[@]}" "$url" | grep -i '^content-length' | tail -1 | tr -dc '0-9')
+    need=$((need + ${size:-0}))
+  done
+  free=$(df -B1 --output=avail "$ROOT" | tail -1 | tr -dc '0-9')
+  echo "Still to download: $((need / 1024**3)) GB, free: $((free / 1024**3)) GB"
+  if [ "$need" -gt "$free" ]; then
+    echo "ERROR: not enough space on $ROOT. Enlarge the network volume or reduce MODEL_SETS." >&2
+    exit 1
+  fi
+fi
 
 failed=0
 running=0
