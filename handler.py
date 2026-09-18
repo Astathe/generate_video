@@ -12,6 +12,7 @@ import urllib.parse
 import urllib.error
 import binascii
 import subprocess
+import shutil
 import time
 
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,11 @@ client_id = str(uuid.uuid4())
 WAN22_WORKFLOW = "/new_Wan22_api.json"
 WAN22_FLF2V_WORKFLOW = "/new_Wan22_flf2v_api.json"
 DASIWA_WORKFLOW = os.getenv("DASIWA_WORKFLOW", "/DaSiWa v11 API.json")
+
+# LoadImage only accepts files inside ComfyUI's input folder (path-traversal
+# protection in newer ComfyUI), so every input image is stored there and the
+# workflow gets a path RELATIVE to this folder.
+COMFY_INPUT_DIR = os.getenv("COMFY_INPUT_DIR", "/ComfyUI/input")
 
 # Node IDs in the DaSiWa v11 API workflow
 DASIWA = {
@@ -61,12 +67,12 @@ def download_file_from_url(url, output_path):
         capture_output=True, text=True,
     )
     if result.returncode != 0:
-        raise Exception(f"URL download failed: {result.stderr}")
+        raise Exception(f"URL download failed: {result.stderr.strip()}")
     logger.info(f"Downloaded {url} -> {output_path}")
     return output_path
 
 
-def save_base64_to_file(base64_data, temp_dir, output_filename):
+def save_base64_to_file(base64_data, output_path):
     # Accept data URIs like "data:image/png;base64,...."
     if isinstance(base64_data, str) and base64_data.startswith("data:") and "," in base64_data:
         base64_data = base64_data.split(",", 1)[1]
@@ -74,35 +80,47 @@ def save_base64_to_file(base64_data, temp_dir, output_filename):
         decoded = base64.b64decode(base64_data)
     except (binascii.Error, ValueError) as e:
         raise Exception(f"Base64 decode failed: {e}")
-    os.makedirs(temp_dir, exist_ok=True)
-    file_path = os.path.abspath(os.path.join(temp_dir, output_filename))
-    with open(file_path, "wb") as f:
+    with open(output_path, "wb") as f:
         f.write(decoded)
-    logger.info(f"Saved base64 input to {file_path}")
-    return file_path
+    logger.info(f"Saved base64 input to {output_path}")
+    return output_path
 
 
-def process_input(input_data, temp_dir, output_filename, input_type):
+def task_input_dir(task_id):
+    path = os.path.join(COMFY_INPUT_DIR, task_id)
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def process_input(input_data, task_id, output_filename, input_type):
+    """Stores an input image inside ComfyUI's input folder.
+    Returns the path RELATIVE to that folder, which is what LoadImage accepts."""
+    dest = os.path.join(task_input_dir(task_id), output_filename)
     if input_type == "path":
         if not os.path.exists(input_data):
             raise Exception(f"Image path does not exist: {input_data}")
-        return input_data
-    if input_type == "url":
-        os.makedirs(temp_dir, exist_ok=True)
-        file_path = os.path.abspath(os.path.join(temp_dir, output_filename))
-        return download_file_from_url(input_data, file_path)
-    if input_type == "base64":
-        return save_base64_to_file(input_data, temp_dir, output_filename)
-    raise Exception(f"Unsupported input type: {input_type}")
+        shutil.copyfile(input_data, dest)   # symlinks are rejected by ComfyUI
+    elif input_type == "url":
+        download_file_from_url(input_data, dest)
+    elif input_type == "base64":
+        save_base64_to_file(input_data, dest)
+    else:
+        raise Exception(f"Unsupported input type: {input_type}")
+    return f"{task_id}/{output_filename}"
 
 
 def get_image_input(job_input, prefix, task_id, filename):
-    """Reads <prefix>_path / <prefix>_url / <prefix>_base64. Returns a local path or None."""
-    for suffix, kind in (("path", "path"), ("url", "url"), ("base64", "base64")):
+    """Reads <prefix>_path / <prefix>_url / <prefix>_base64.
+    Returns a path relative to ComfyUI's input folder, or None."""
+    for suffix in ("path", "url", "base64"):
         key = f"{prefix}_{suffix}"
         if key in job_input and job_input[key]:
-            return process_input(job_input[key], task_id, filename, kind)
+            return process_input(job_input[key], task_id, filename, suffix)
     return None
+
+
+def cleanup_task(task_id):
+    shutil.rmtree(os.path.join(COMFY_INPUT_DIR, task_id), ignore_errors=True)
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +217,9 @@ def connect_ws():
 
 def build_wan22_prompt(job_input, task_id):
     """Original behaviour of the upstream repo (unchanged API)."""
-    image_path = get_image_input(job_input, "image", task_id, "input_image.jpg") or "/example_image.png"
+    image_path = get_image_input(job_input, "image", task_id, "input_image.jpg")
+    if not image_path:
+        image_path = process_input("/example_image.png", task_id, "example_image.png", "path")
     end_image_path = get_image_input(job_input, "end_image", task_id, "end_image.jpg")
 
     lora_pairs = job_input.get("lora_pairs", [])[:4]
@@ -374,6 +394,8 @@ def handler(job):
     except Exception as e:
         logger.exception("Job failed")
         return {"error": str(e)}
+    finally:
+        cleanup_task(task_id)
 
     if not video_b64:
         return {"error": "No video was produced."}
