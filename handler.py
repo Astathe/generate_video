@@ -52,6 +52,7 @@ DASIWA = {
     "rife": "1512:1814:1812",          # RIFE x2 interpolation
     "rife_fps": "1512:1814:1813",      # fps * 2
     "rife_fps_switch": "1512:1814:1810",
+    "sage_toggle": "1512:1523",        # Boolean feeding the Sage Attention if/else
 }
 
 
@@ -72,12 +73,20 @@ def to_nearest_multiple_of_16(value):
 
 
 def download_file_from_url(url, output_path):
+    # Browser-like headers: many image hosts block wget's default user agent or
+    # serve an HTML page instead of the image to non-browser clients.
+    origin = "/".join(url.split("/")[:3]) + "/"
     result = subprocess.run(
-        ["wget", "-O", output_path, "--no-verbose", "--timeout=60", url],
+        ["wget", "-O", output_path, "--no-verbose", "--timeout=60", "--tries=2",
+         "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+         "(KHTML, like Gecko) Chrome/128.0 Safari/537.36",
+         "--header=Accept: image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5",
+         f"--header=Referer: {origin}",
+         url],
         capture_output=True, text=True,
     )
     if result.returncode != 0:
-        raise Exception(f"URL download failed: {result.stderr.strip()}")
+        raise Exception(f"URL download failed ({url}): {result.stderr.strip()[-300:]}")
     logger.info(f"Downloaded {url} -> {output_path}")
     return output_path
 
@@ -124,10 +133,15 @@ def verify_image(path, source):
     text = head.decode("utf-8", errors="replace").strip().lower()
     if size == 0:
         hint = "the file is empty"
-    elif text.startswith(("<!doctype", "<html", "<?xml", "<head")):
-        hint = ("it is a web page (HTML), not an image. The URL points to a page or "
-                "blocked the download (e.g. Pixiv, Google Drive share links). "
-                "Use a direct image link or send image_base64")
+    elif "<html" in text or text.startswith(("<!doctype", "<?xml", "<head")):
+        with open(path, "rb") as f:
+            page = f.read(300000).decode("utf-8", errors="replace")
+        import re
+        m = re.search(r"<title[^>]*>(.*?)</title>", page, re.I | re.S)
+        title = " ".join(m.group(1).split())[:100] if m else "no title"
+        hint = (f"it is a web page (HTML) titled {title!r}, not an image. The link expired, "
+                f"points to a page instead of the image file, or the site blocks downloads "
+                f"from servers. Use a direct image link or send image_base64")
     elif text.startswith("{"):
         hint = f"it is JSON/text: {text[:120]!r}"
     elif head[:4] in (b"iVBO", b"/9j/") or text[:10].isalnum():
@@ -383,6 +397,9 @@ def build_dasiwa_prompt(job_input, task_id):
     if "scheduler" in job_input:
         sampling["scheduler"] = job_input["scheduler"]
 
+    # --- Attention --------------------------------------------------------
+    prompt[N["sage_toggle"]]["inputs"]["value"] = USE_SAGE
+
     # --- Length / resolution ---------------------------------------------
     # Frames = round(seconds * fps / 8) * 8 + 1 (computed inside the workflow)
     if "seconds" in job_input:
@@ -408,13 +425,42 @@ def build_dasiwa_prompt(job_input, task_id):
     # the frame count with RIFE. The 4x upscale needs tens of GB of system RAM,
     # so it is OFF by default here. Set "upscale": true (or DEFAULT_UPSCALE=1)
     # on a GPU type with plenty of RAM to get the original behaviour.
-    upscale = bool(job_input.get("upscale", env_bool("DEFAULT_UPSCALE", False)))
+    #
+    # "upscale_to": <long side in px>, e.g. 2560 for 2K, 1920 for 1080p.
+    # Runs the 4x model, then immediately resizes to the target so RIFE and the
+    # video encoder work at the target size instead of ~4000px (much less RAM).
+    upscale_to = job_input.get("upscale_to")
+    upscale = bool(upscale_to) or bool(job_input.get("upscale", env_bool("DEFAULT_UPSCALE", False)))
     interpolate = bool(job_input.get("interpolate", env_bool("DEFAULT_INTERPOLATE", True)))
 
-    frames = [N["upscale"], 0] if upscale else [N["loop_frames"], 0]
-    if not upscale:
+    if upscale:
+        prompt[N["upscale"]]["inputs"]["precision"] = "fp16"   # faster, less VRAM
+        prompt[N["upscale"]]["inputs"]["max_batch_size"] = 8   # avoid VRAM spikes
+        frames = [N["upscale"], 0]
+    else:
         prompt.pop(N["upscale"], None)
         prompt.pop(N["upscale_model"], None)
+        frames = [N["loop_frames"], 0]
+
+    if upscale_to:
+        target = int(upscale_to)
+        if not 512 <= target <= 4096:
+            raise Exception("upscale_to must be between 512 and 4096 (long side in pixels)")
+        from PIL import Image
+        with Image.open(os.path.join(COMFY_INPUT_DIR, image_path)) as im:
+            w, h = im.size
+        short = target * min(w, h) / max(w, h)
+        prompt["upscale_resize"] = {
+            "class_type": "ImageScaleToTotalPixels",
+            "inputs": {
+                "image": frames,
+                "upscale_method": "lanczos",
+                "megapixels": round(target * short / (1024 * 1024), 3),
+                "resolution_steps": 16,   # even sizes, required by the h264 encoder
+            },
+            "_meta": {"title": "Resize to target"},
+        }
+        frames = ["upscale_resize", 0]
 
     out = prompt[N["output"]]["inputs"]
     if interpolate:
@@ -432,9 +478,26 @@ def build_dasiwa_prompt(job_input, task_id):
     logger.info(
         f"DaSiWa: seed={seed} steps={sampling['steps_total']} refiner={sampling['refiner_step']} "
         f"cfg={sampling['cfg']} mode={'LOOP' if end_image_path == image_path else 'FLF2V' if end_image_path else 'I2V'} "
-        f"upscale={upscale} interpolate={interpolate}"
+        f"upscale={upscale_to or upscale} interpolate={interpolate}"
     )
     return prompt, N["output"], {"seed": int(seed)}
+
+
+def gpu_info():
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,compute_cap", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=10,
+        ).stdout.strip().splitlines()
+        return out[0] if out else "unknown"
+    except Exception:
+        return "unknown"
+
+
+GPU = gpu_info()
+# Set by entrypoint.sh: SageAttention only on Blackwell (see there)
+USE_SAGE = os.getenv("USE_SAGE", "1") == "1"
+logger.info(f"GPU: {GPU} | SageAttention: {'on' if USE_SAGE else 'off'}")
 
 
 WORKFLOWS = {
@@ -467,13 +530,13 @@ def handler(job):
             ws.close()
     except Exception as e:
         logger.exception("Job failed")
-        return {"error": str(e)}
+        return {"error": f"{e} [GPU: {GPU}]", "gpu": GPU}
     finally:
         cleanup_task(task_id)
 
     if not video_b64:
         return {"error": "No video was produced."}
-    return {"video": video_b64, "format": fmt, "workflow": workflow_name, **meta}
+    return {"video": video_b64, "format": fmt, "workflow": workflow_name, "gpu": GPU, **meta}
 
 
 if __name__ == "__main__":

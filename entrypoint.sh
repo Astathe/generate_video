@@ -11,7 +11,27 @@ echo "Starting ComfyUI in the background..."
 # --disable-pinned-memory: pinned (page-locked) RAM can't be reclaimed and
 # counts fully against the container's memory limit.
 # Override everything with the COMFYUI_ARGS env var on the endpoint.
-COMFYUI_ARGS="${COMFYUI_ARGS:---use-sage-attention --disable-pinned-memory}"
+GPU_CC=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d ' ')
+GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
+echo "GPU: $GPU_NAME (compute capability $GPU_CC)"
+# The base image's SageAttention build only has kernels for Blackwell (12.x).
+# On older GPUs (RTX 4090 = 8.9, A-series = 8.6) it fails with
+# "no kernel image is available", so it is only enabled on Blackwell.
+# Force it with SAGE_ATTENTION=on / off.
+case "${SAGE_ATTENTION:-auto}" in
+  on)  USE_SAGE=1 ;;
+  off) USE_SAGE=0 ;;
+  *)   if [ "${GPU_CC%%.*}" -ge 12 ] 2>/dev/null; then USE_SAGE=1; else USE_SAGE=0; fi ;;
+esac
+export USE_SAGE
+if [ "$USE_SAGE" = "1" ]; then
+  DEFAULT_ARGS="--use-sage-attention --disable-pinned-memory"
+  echo "SageAttention: ON"
+else
+  DEFAULT_ARGS="--disable-pinned-memory"
+  echo "SageAttention: OFF (not a Blackwell GPU)"
+fi
+COMFYUI_ARGS="${COMFYUI_ARGS:-$DEFAULT_ARGS}"
 echo "ComfyUI args: $COMFYUI_ARGS"
 python /ComfyUI/main.py --listen $COMFYUI_ARGS &
 
