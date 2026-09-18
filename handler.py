@@ -245,7 +245,7 @@ def build_wan22_prompt(job_input, task_id):
             prompt["553"]["inputs"][f"lora_{i + 1}"] = pair["low"]
             prompt["553"]["inputs"][f"strength_{i + 1}"] = pair.get("low_weight", 1.0)
 
-    return prompt, None
+    return prompt, None, {"seed": seed}
 
 
 def set_power_loras(node_inputs, loras):
@@ -267,6 +267,9 @@ def build_dasiwa_prompt(job_input, task_id):
     prompt[N["first_image"]]["inputs"]["image"] = image_path
 
     end_image_path = get_image_input(job_input, "end_image", task_id, "end_image.png")
+    if not end_image_path and job_input.get("loop"):
+        # Loop mode: reuse the first frame as the last frame (upload once)
+        end_image_path = image_path
     if end_image_path:
         prompt[N["last_image"]]["inputs"]["image"] = end_image_path
     else:
@@ -335,9 +338,9 @@ def build_dasiwa_prompt(job_input, task_id):
 
     logger.info(
         f"DaSiWa: seed={seed} steps={sampling['steps_total']} refiner={sampling['refiner_step']} "
-        f"cfg={sampling['cfg']} mode={'FLF2V' if end_image_path else 'I2V'}"
+        f"cfg={sampling['cfg']} mode={'LOOP' if end_image_path == image_path else 'FLF2V' if end_image_path else 'I2V'}"
     )
-    return prompt, N["output"]
+    return prompt, N["output"], {"seed": int(seed)}
 
 
 WORKFLOWS = {
@@ -361,7 +364,7 @@ def handler(job):
         return {"error": f"Unknown workflow '{workflow_name}'. Options: {list(WORKFLOWS)}"}
 
     try:
-        prompt, output_node = WORKFLOWS[workflow_name](job_input, task_id)
+        prompt, output_node, meta = WORKFLOWS[workflow_name](job_input, task_id)
         wait_for_comfyui()
         ws = connect_ws()
         try:
@@ -374,7 +377,7 @@ def handler(job):
 
     if not video_b64:
         return {"error": "No video was produced."}
-    return {"video": video_b64, "format": fmt, "workflow": workflow_name}
+    return {"video": video_b64, "format": fmt, "workflow": workflow_name, **meta}
 
 
 if __name__ == "__main__":

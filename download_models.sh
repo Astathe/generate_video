@@ -11,6 +11,7 @@
 #   HF_TOKEN             sent to huggingface.co if set (private/gated repos)
 #   PARALLEL_DOWNLOADS   concurrent downloads (default: 3)
 #   DRY_RUN=1            only print what would be downloaded
+#   VOLUME_SIZE_GB       your network volume's size, for an accurate space check
 #   VOLUME_ROOT          volume mount point (default /runpod-volume; use
 #                        /workspace when running on a regular pod)
 set -uo pipefail
@@ -125,7 +126,7 @@ download() {
 
   local reason
   case "$rc" in
-    3) reason="file write error - volume/disk is probably FULL" ;;
+    3) reason="file write error - network volume quota is probably FULL" ;;
     4) reason="network failure" ;;
     5) reason="SSL error" ;;
     6) reason="authentication failed - check HF_TOKEN" ;;
@@ -141,9 +142,9 @@ download() {
   return 1
 }
 
-# Remove temp files abandoned by workers that died mid-download (> 6 h old)
+# Remove temp files abandoned by workers that died mid-download (> 1 h old)
 find "$DIFFUSION" "$LORAS" "$FOLEY" "$CLIP_VISION" "$TEXT" "$VAE" \
-  -maxdepth 1 -name '*.part.*' -mmin +360 -delete 2>/dev/null || true
+  -maxdepth 1 -name '*.part.*' -mmin +60 -delete 2>/dev/null || true
 
 FILES=()
 IFS=',' read -ra SETS <<< "$MODEL_SETS"
@@ -161,7 +162,9 @@ done
 echo "Model sets: $MODEL_SETS  (${#FILES[@]} files)"
 df -h "$ROOT" | tail -1 | awk '{print "Disk " $6 ": size " $2 ", used " $3 ", free " $4}'
 
-# Estimate how much still needs downloading (HEAD request per missing file)
+# Estimate how much still needs downloading (HEAD request per missing file).
+# NOTE: on RunPod network volumes `df` shows the whole storage cluster (petabytes),
+# not your volume's size. Set VOLUME_SIZE_GB to your volume's size for a real check.
 if [ "$DRY_RUN" != "1" ]; then
   need=0
   for entry in "${FILES[@]}"; do
@@ -174,9 +177,21 @@ if [ "$DRY_RUN" != "1" ]; then
     size=$(curl -sIL "${hdr[@]}" "$url" | grep -i '^content-length' | tail -1 | tr -dc '0-9')
     need=$((need + ${size:-0}))
   done
-  free=$(df -B1 --output=avail "$ROOT" | tail -1 | tr -dc '0-9')
-  echo "Still to download: $((need / 1024**3)) GB, free: $((free / 1024**3)) GB"
-  if [ "$need" -gt "$free" ]; then
+
+  if [ -n "${VOLUME_SIZE_GB:-}" ]; then
+    used=$(du -sb "$ROOT" 2>/dev/null | cut -f1)
+    free=$(( VOLUME_SIZE_GB * 1024**3 - ${used:-0} ))
+    echo "Volume: ${VOLUME_SIZE_GB} GB, used $(( ${used:-0} / 1024**3 )) GB (by du)"
+  else
+    free=$(df -B1 --output=avail "$ROOT" | tail -1 | tr -dc '0-9')
+    if [ "$free" -gt $((100 * 1024**4)) ]; then
+      echo "NOTE: df reports ${free} bytes free - that's the storage cluster, not your volume."
+      echo "      Set VOLUME_SIZE_GB on the endpoint for an accurate space check."
+      free=""
+    fi
+  fi
+  echo "Still to download: $((need / 1024**3)) GB${free:+, free: $((free / 1024**3)) GB}"
+  if [ -n "$free" ] && [ "$need" -gt "$free" ]; then
     echo "ERROR: not enough space on $ROOT. Enlarge the network volume or reduce MODEL_SETS." >&2
     exit 1
   fi
