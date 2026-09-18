@@ -46,7 +46,17 @@ DASIWA = {
     "lora_high": "26",
     "lora_low": "18",
     "output": "28",
+    "loop_frames": "1512:1731:1099",   # frames after the (optional) loop fix-up
+    "upscale": "1512:1729:1105",       # RealESRGAN 4x
+    "upscale_model": "1512:1729:1106",
+    "rife": "1512:1814:1812",          # RIFE x2 interpolation
+    "rife_fps": "1512:1814:1813",      # fps * 2
+    "rife_fps_switch": "1512:1814:1810",
 }
+
+
+def env_bool(name, default):
+    return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
 
 
 # ---------------------------------------------------------------------------
@@ -73,17 +83,58 @@ def download_file_from_url(url, output_path):
 
 
 def save_base64_to_file(base64_data, output_path):
+    if not isinstance(base64_data, str):
+        raise Exception("base64 input must be a string")
+    data = base64_data.strip()
     # Accept data URIs like "data:image/png;base64,...."
-    if isinstance(base64_data, str) and base64_data.startswith("data:") and "," in base64_data:
-        base64_data = base64_data.split(",", 1)[1]
+    if data.startswith("data:") and "," in data:
+        data = data.split(",", 1)[1]
+    data = "".join(data.split())               # drop newlines/spaces from copy-paste
+    data += "=" * (-len(data) % 4)             # repair missing padding
     try:
-        decoded = base64.b64decode(base64_data)
+        # validate=True: reject text that isn't base64 instead of silently
+        # decoding it into garbage bytes
+        decoded = base64.b64decode(data, validate=True)
     except (binascii.Error, ValueError) as e:
-        raise Exception(f"Base64 decode failed: {e}")
+        raise Exception(
+            f"image_base64 is not valid base64 ({e}). Send the base64 of the image FILE "
+            f"(starts with 'iVBOR' for PNG or '/9j/' for JPEG), not a file path or URL."
+        )
     with open(output_path, "wb") as f:
         f.write(decoded)
-    logger.info(f"Saved base64 input to {output_path}")
+    logger.info(f"Saved base64 input to {output_path} ({len(decoded)} bytes)")
     return output_path
+
+
+def verify_image(path, source):
+    """Make sure the saved file is a real image and explain what it is if not."""
+    from PIL import Image
+    try:
+        with Image.open(path) as img:
+            img.verify()
+        with Image.open(path) as img:
+            logger.info(f"Input image OK: {img.format} {img.size[0]}x{img.size[1]}")
+        return
+    except Exception:
+        pass
+
+    with open(path, "rb") as f:
+        head = f.read(200)
+    size = os.path.getsize(path)
+    text = head.decode("utf-8", errors="replace").strip().lower()
+    if size == 0:
+        hint = "the file is empty"
+    elif text.startswith(("<!doctype", "<html", "<?xml", "<head")):
+        hint = ("it is a web page (HTML), not an image. The URL points to a page or "
+                "blocked the download (e.g. Pixiv, Google Drive share links). "
+                "Use a direct image link or send image_base64")
+    elif text.startswith("{"):
+        hint = f"it is JSON/text: {text[:120]!r}"
+    elif head[:4] in (b"iVBO", b"/9j/") or text[:10].isalnum():
+        hint = "it looks like base64 text that was encoded twice"
+    else:
+        hint = f"unknown format, first bytes: {head[:16]!r}"
+    raise Exception(f"Input {source} is not a valid image ({size} bytes): {hint}.")
 
 
 def task_input_dir(task_id):
@@ -106,6 +157,7 @@ def process_input(input_data, task_id, output_filename, input_type):
         save_base64_to_file(input_data, dest)
     else:
         raise Exception(f"Unsupported input type: {input_type}")
+    verify_image(dest, f"'{output_filename.rsplit('.', 1)[0]}' ({input_type})")
     return f"{task_id}/{output_filename}"
 
 
@@ -351,14 +403,36 @@ def build_dasiwa_prompt(job_input, task_id):
         set_power_loras(prompt[N["lora_high"]]["inputs"], high)
         set_power_loras(prompt[N["lora_low"]]["inputs"], low)
 
-    # --- Output -----------------------------------------------------------
+    # --- Post-processing --------------------------------------------------
+    # The workflow upscales every frame 4x (~4000x2900, fp32) and then doubles
+    # the frame count with RIFE. The 4x upscale needs tens of GB of system RAM,
+    # so it is OFF by default here. Set "upscale": true (or DEFAULT_UPSCALE=1)
+    # on a GPU type with plenty of RAM to get the original behaviour.
+    upscale = bool(job_input.get("upscale", env_bool("DEFAULT_UPSCALE", False)))
+    interpolate = bool(job_input.get("interpolate", env_bool("DEFAULT_INTERPOLATE", True)))
+
+    frames = [N["upscale"], 0] if upscale else [N["loop_frames"], 0]
+    if not upscale:
+        prompt.pop(N["upscale"], None)
+        prompt.pop(N["upscale_model"], None)
+
     out = prompt[N["output"]]["inputs"]
+    if interpolate:
+        prompt[N["rife"]]["inputs"]["frames"] = frames
+    else:
+        out["images"] = frames
+        out["frame_rate"] = [N["fps"], 0]
+        for key in ("rife", "rife_fps", "rife_fps_switch"):
+            prompt.pop(N[key], None)
+
+    # --- Output -----------------------------------------------------------
     out["format"] = "video/webm" if job_input.get("output_format") == "webm" else "video/h264-mp4"
     out["filename_prefix"] = f"runpod/{task_id}"
 
     logger.info(
         f"DaSiWa: seed={seed} steps={sampling['steps_total']} refiner={sampling['refiner_step']} "
-        f"cfg={sampling['cfg']} mode={'LOOP' if end_image_path == image_path else 'FLF2V' if end_image_path else 'I2V'}"
+        f"cfg={sampling['cfg']} mode={'LOOP' if end_image_path == image_path else 'FLF2V' if end_image_path else 'I2V'} "
+        f"upscale={upscale} interpolate={interpolate}"
     )
     return prompt, N["output"], {"seed": int(seed)}
 

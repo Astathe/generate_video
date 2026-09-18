@@ -8,7 +8,12 @@ echo "Ensuring models are present..."
 
 # Start ComfyUI in the background
 echo "Starting ComfyUI in the background..."
-python /ComfyUI/main.py --listen --use-sage-attention &
+# --disable-pinned-memory: pinned (page-locked) RAM can't be reclaimed and
+# counts fully against the container's memory limit.
+# Override everything with the COMFYUI_ARGS env var on the endpoint.
+COMFYUI_ARGS="${COMFYUI_ARGS:---use-sage-attention --disable-pinned-memory}"
+echo "ComfyUI args: $COMFYUI_ARGS"
+python /ComfyUI/main.py --listen $COMFYUI_ARGS &
 
 # Wait for ComfyUI to be ready
 echo "Waiting for ComfyUI to be ready..."
